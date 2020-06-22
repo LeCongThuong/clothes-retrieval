@@ -43,7 +43,9 @@ def main():
                 move_rename(image_path, out_dir)
                 total_image += 1
                 eval_file_list.append(image_path.split('/')[-1])
+                
                 continue
+        continue
 
     with open(eval_file_paths_logs, 'a+') as f:
         f.write('\n'.join(eval_file_list))
