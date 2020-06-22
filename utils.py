@@ -31,9 +31,10 @@ from samplers import pk_sampler, pk_sample_full_coverage_epoch
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image_paths_list', type=str, default='/content/archface_model/data_train')
+    parser.add_argument('--image_paths_list', type=str, default='/content/clothes-retrieval/metadata/data_train_list_file.txt')
     parser.add_argument('--labels_file', type=str, default='/content/clothes-retrieval/metadata/labels_without_one_image_items.txt')
     parser.add_argument('--eval_paths_file', type=str, default='/content/clothes-retrieval/metadata/data_eval_list_file.txt')
+    parser.add_argument('--label_to_samples_file', type=str, default='/content/clothes-retrieval/metadata/label_to_samples.txt')
     parser.add_argument('--archi', default='densenet121',
                         choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnext',
                                  'densenet121',

@@ -61,7 +61,7 @@ def main():
     mapping_files_to_global_id = dict(zip(paths, range(len(paths))))
 
     # read dictionary that maps from label to image paths
-    with open(args.labels_file, 'r') as f:
+    with open(args.label_to_samples_file, 'r') as f:
         labels_to_samples = dict(json.load(f))
 
     # read eval image paths from file
@@ -110,8 +110,8 @@ def main():
 
     # define optimizer
     my_list = ['model.classification_layer.weight', 'model.classification_layer.bias']
-    params = list(filter(lambda kv: kv[0] in my_list, model.named_parameters()))
-    base_params = list(filter(lambda kv: kv[0] not in my_list, model.named_parameters()))
+    params = list(filter(lambda kv: kv[1] in my_list, model.named_parameters()))
+    base_params = list(filter(lambda kv: kv[1] not in my_list, model.named_parameters()))
 
     if args.loss == 'arcface':
         optimizer = Adam([{'params': base_params},
@@ -145,7 +145,6 @@ def main():
     dataloader = DataLoader(dataset,
                             sampler=sampler,
                             batch_size=args.batch_size,
-                            shuffle=True,
                             drop_last=True,
                             num_workers=args.num_workers)
     model.train()
@@ -233,7 +232,7 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
         optimizer.step()
         losses.append(loss.item())
         losses_arcface.append(loss_arcface.item())
-        losses_ce.append(losses_ce.item())
+        losses_ce.append(losses_ce)
 
         writer.add_scalar(f'total_loss',
                           loss.item(),
