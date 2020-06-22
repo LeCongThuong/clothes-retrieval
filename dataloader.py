@@ -108,3 +108,4 @@ def augmentation(image_size, train=True):
                                  std=[0.229, 0.224, 0.225])
         ])
     return data_transform
+

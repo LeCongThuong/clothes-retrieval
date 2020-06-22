@@ -13,29 +13,26 @@ def grouper(iterable, n):
 
 class PKSampler(Sampler):
 
-    def __init__(self, root, data_source, classes, labels_to_samples, mapping_files_to_global_id, mapping_filename_path, p=64, k=16):
+    def __init__(self, data_source, classes, labels_to_samples, mapping_files_to_global_id, p=64, k=16):
         super().__init__(data_source)
-        self.root = root
         self.p = p
         self.k = k
         self.data_source = data_source
         self.classes = classes
         self.labels_to_samples = labels_to_samples
         self.mapping_files_to_global_id = mapping_files_to_global_id
-        self.mapping_filename_path = mapping_filename_path
 
     def __iter__(self):
         rand_labels = np.random.permutation(
             np.arange(len(self.labels_to_samples.keys())))
+
         for labels_indices in grouper(rand_labels, self.p):
-            for li in labels_indices:
-                label = list(self.labels_to_samples.keys())[li]
+            for label_index in labels_indices:
+                label = list(self.labels_to_samples.keys())[label_index]
                 samples = self.labels_to_samples[label]
                 replace = True if len(samples) < self.k else False
                 for s in np.random.choice(samples, self.k, replace=replace):
-                    #path = f'{self.root}{label}/{s}'
-                    path = self.mapping_filename_path[s]
-                    index = self.mapping_files_to_global_id[path]
+                    index = self.mapping_files_to_global_id[s]
                     yield index
 
     def __len__(self):

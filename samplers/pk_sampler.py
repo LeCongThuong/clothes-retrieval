@@ -4,16 +4,14 @@ from torch.utils.data import Sampler
 
 
 class PKSampler(Sampler):
-    def __init__(self, root, data_source, classes, labels_to_samples, mapping_files_to_global_id, mapping_filename_path, p=64, k=16):
+    def __init__(self, data_source, classes, labels_to_samples, mapping_files_to_global_id, p=64, k=16):
         super().__init__(data_source)
-        self.root = root
         self.p = p
         self.k = k
         self.data_source = data_source
         self.classes = classes
         self.labels_to_samples = labels_to_samples
         self.mapping_files_to_global_id = mapping_files_to_global_id
-        self.mapping_filename_path = mapping_filename_path
 
     def __iter__(self):
         pk_count = len(self) // (self.p * self.k)
@@ -26,9 +24,7 @@ class PKSampler(Sampler):
                 samples = self.labels_to_samples[l]
                 replace = True if len(samples) < self.k else False
                 for s in np.random.choice(samples, self.k, replace=replace):
-                    #path = f'{self.root}{l}/{s}'
-                    path = self.mapping_filename_path[s]
-                    index = self.mapping_files_to_global_id[path]
+                    index = self.mapping_files_to_global_id[s]
                     yield index
 
     def __len__(self):
