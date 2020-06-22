@@ -12,7 +12,7 @@ def main():
     image_paths_list = glob.glob(images_dir + '/*')
     for image_path in image_paths_list:
         print('\r ', image_path, end='')
-        image_name = image_path.split('/')
+        image_name = image_path.split('/')[-1]
         name_path_component = image_name.split('~')
         label = name_path_component[-4]
         new_image_path = prepend_str + '/' + image_name

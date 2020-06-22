@@ -42,7 +42,6 @@ def main():
     data_transform = augmentation(args.image_size, train=True)
 
     output_folder = log_experience(args, date_id, data_transform)
-    # if args.loss == 'triplet':
 
     # read labels from file
     with open(labels_file, 'r') as f:
@@ -102,8 +101,8 @@ def main():
         if 'state_dict' in checkpoint.keys():
             backbone = checkpoint['state_dict']
         try:
-            backbone['state_dict'].pop('model.classification_layer.weight')
-            backbone['state_dict'].pop('model.classification_layer.bias')
+            backbone.pop('model.classification_layer.weight')
+            backbone.pop('model.classification_layer.bias')
         except KeyError:
             print('Key Error: No classification layer, skipp')
         model.load_state_dict(backbone, strict=False)
@@ -149,8 +148,6 @@ def main():
                             shuffle=True,
                             drop_last=True,
                             num_workers=args.num_workers)
-
-
     model.train()
 
     # start training loop
