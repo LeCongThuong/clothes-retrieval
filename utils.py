@@ -31,10 +31,10 @@ from samplers import pk_sampler, pk_sample_full_coverage_epoch
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image_paths_list', type=str, default='/content/archface_model/data')
-    parser.add_argument('--labels_file', type=str, default='/content/archface_model/metadata/labels.txt')
-    parser.add_argument('--eval_paths_file', type=str, default='/content/archface_model/eval_paths_file' )
-    parser.add_argument('--archi', default='resnet34',
+    parser.add_argument('--image_paths_list', type=str, default='/content/archface_model/data_train')
+    parser.add_argument('--labels_file', type=str, default='/content/clothes-retrieval/metadata/labels_without_one_image_items.txt')
+    parser.add_argument('--eval_paths_file', type=str, default='/content/clothes-retrieval/metadata/data_eval_list_file.txt')
+    parser.add_argument('--archi', default='densenet121',
                         choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnext',
                                  'densenet121',
                                  'mobilenet',
@@ -42,7 +42,7 @@ def parse_arguments():
     parser.add_argument('--embedding-dim', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.4)
     parser.add_argument('--alpha', type=int, default=8)
-    parser.add_argument('--pretrained', type=int, choices=[0, 1], default=1)
+    parser.add_argument('--pretrained', type=int, choices=[0, 1], default=0)
     parser.add_argument('--image-size', type=int, default=224)
     parser.add_argument('--loss', default='arcface', choices=['arcface', 'triplet'])
 
@@ -52,28 +52,24 @@ def parse_arguments():
     parser.add_argument('--sampler', type=int, default=2, choices=[1, 2])
 
     parser.add_argument('--lr', type=float, default=2e-3)
-    parser.add_argument('--fs_lr', type=float, default=2e-3)
+    parser.add_argument('--fs_lr', type=float, default=8e-3)
     parser.add_argument('--wd', type=float, default=0.001)
-    parser.add_argument('--epochs', type=int, default=80)
+    parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--start-epoch', type=int, default=0)
-    parser.add_argument('--batch-size', type=int, default=32)
+    parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--num-workers', type=int, default=12)
 
     parser.add_argument('--logging-step', type=int, default=20)
-    parser.add_argument('--output', type=str, default='./models/')
 
     parser.add_argument('--checkpoint', type=str, default=None)
     parser.add_argument('--pop-fc', type=int, default=1)
-    parser.add_argument('--log_path', type=str, default='./logs/')
+    parser.add_argument('--log_path', type=str, default='/content/clothes-retrieval/training_output/')
     parser.add_argument('--tag', type=str, default='')
-    parser.add_argument('--save-optim', type=int, default=0, choices=[0, 1])
 
-    parser.add_argument('--checkpoint-period', type=int, default=3)
+    parser.add_argument('--checkpoint-period', type=int, default=2)
 
     parser.add_argument('--scheduler', type=str,
                         choices=['multistep', 'cosine', 'warmup'], default='warmup')
-    parser.add_argument('--min-lr', type=float, default=2.4e-6)
-    parser.add_argument('--max-lr', type=float, default=1.4e-5)
     parser.add_argument('--step-size', type=int, default=4)
     parser.add_argument('--gamma', type=float, default=0.1)
     parser.add_argument('--milestones', nargs='+', type=int)
