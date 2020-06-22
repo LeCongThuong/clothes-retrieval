@@ -110,8 +110,8 @@ def main():
 
     # define optimizer
     my_list = ['model.classification_layer.weight', 'model.classification_layer.bias']
-    params = list(filter(lambda kv: kv[1] in my_list, model.named_parameters()))
-    base_params = list(filter(lambda kv: kv[1] not in my_list, model.named_parameters()))
+    params = list(map(lambda x: x[1], list(filter(lambda kv: kv[0] in my_list, model.named_parameters()))))
+    base_params = list(map(lambda x: x[1], list(filter(lambda kv: kv[0] not in my_list, model.named_parameters()))))
 
     if args.loss == 'arcface':
         optimizer = Adam([{'params': base_params},
