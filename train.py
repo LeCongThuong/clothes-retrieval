@@ -250,12 +250,12 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
         #if (i % logging_step == 0) & (i > 0):
         running_avg_loss = np.mean(losses)
         running_avg_arcface_loss = np.mean(losses_arcface)
-        running_avg_ce_loss = np.mean(losses_ce)
-        print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: [total_loss {running_avg_loss}][arcface_loss {running_avg_arcface_loss}][[ce_loss {running_avg_ce_loss}]]')
+        #running_avg_ce_loss = np.mean(losses_ce)
+        print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: [total_loss {running_avg_loss}][arcface_loss {running_avg_arcface_loss}]]')
 
     average_total_loss = np.mean(losses)
     average_arcface_loss = np.mean(losses_arcface)
-    average_ce_loss = np.mean(losses_ce)
+    #average_ce_loss = np.mean(losses_ce)
 
     writer.add_scalar(f'total=loss-epoch',
                       average_total_loss,
@@ -267,10 +267,10 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
                       epoch
                       )
 
-    writer.add_scalar(f'ce-loss-epoch',
-                      average_ce_loss,
-                      epoch
-                      )
+    # writer.add_scalar(f'ce-loss-epoch',
+    #                   average_ce_loss,
+    #                   epoch
+    #                   )
 
 
 def triplet_train(model, dataloader, optimizer, criterion, logging_step, epoch, epochs, writer, date_id, output_folder, scheduler):
