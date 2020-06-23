@@ -207,7 +207,24 @@ def get_sampler(args,
     return sampler
 
 
-# utility function to generate a submission file
+# find top n images that have same gave category
+def find_n_images_same_cate(given_cate: str, paths: list, sorted_index_list: list, n=20):
+    sorted_paths = [paths[i] for i in sorted_index_list]
+    n_same_cate_images = []
+    n_image_types = []
+    total_images_collected = 0
+
+    for path in reversed(sorted_paths):
+        image_cate = path.split('/')[-1].split('~')[2:4]
+        image_type = path.split('/')[-1].split('~')[-4]
+        if image_cate == given_cate:
+            n_same_cate_images.append(path)
+            n_image_types.append(image_type)
+            total_images_collected += 1
+            if total_images_collected >= n:
+                return n_same_cate_images, n_image_types
+
+    return n_same_cate_images, n_image_types
 
 
 def compute_predictions(args, model, paths: list, eval_paths: list, mapping_label_id, time_id, writer:SummaryWriter, epoch):
@@ -266,21 +283,28 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
     acc_top_10 = 0
     acc_top_20 = 0
 
-    for i in range(len(eval_paths)):
-        if eval_label_indexes[i] == sorted_res[i, -1]:
+    # list of list
+    n_same_cate_images_total = []
+    for i, eval_path in enumerate(eval_paths):
+        eval_cate = eval_path.split('/')[-1].split('~')[2:4]
+        eval_type = eval_path.split('/')[-1].split('~')[-4]
+
+        n_same_cate_images, n_image_types = find_n_images_same_cate(eval_cate, paths, sorted_index[i], n=20)
+        n_same_cate_images_total.append(n_same_cate_images)
+        if eval_type == n_image_types[0]:
             acc_top_1 += 1
-        if eval_label_indexes[i] in sorted_res[i, -5:]:
+        if eval_type in n_image_types[: 5]:
             acc_top_5 += 1
-        if eval_label_indexes[i] in sorted_res[i, -10:]:
+        if eval_type in n_image_types[:10]:
             acc_top_10 += 1
-        if eval_label_indexes[i] in sorted_res[i, -20:]:
+        if eval_type in n_image_types[:20]:
             acc_top_20 += 1
 
     print("---------------------------------------------")
-    print("acc_top_1: ", acc_top_1 / len(eval_label_indexes))
-    print("acc_top_5: ", acc_top_5 / len(eval_label_indexes))
-    print("acc_top_10: ", acc_top_10 / len(eval_label_indexes))
-    print("acc_top_20: ", acc_top_20 / len(eval_label_indexes))
+    print("acc_top_1: ", acc_top_1 / len(eval_paths))
+    print("acc_top_5: ", acc_top_5 / len(eval_paths))
+    print("acc_top_10: ", acc_top_10 / len(eval_paths))
+    print("acc_top_20: ", acc_top_20 / len(eval_paths))
     print("---------------------------------------------")
     print("predictions generated...")
     writer.add_scalar(f'accuracy_top_1',
@@ -303,20 +327,18 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                       epoch
                       )
     # sorted array according
-
-    for i in range(10):
+    for i, same_cate_images in enumerate(n_same_cate_images_total[:20]):
         fig = plt.figure(figsize=(12, 48))
         query_image = eval_paths[i]
-        image_result_index = sorted_index[i, :]
-        sorted_paths = []
-        for value in image_result_index:
-            sorted_paths.append(paths[value])
-        image_result = sorted_paths[-10:]
-        images_show = []
-        images_show.append(query_image)
-        for image_re in image_result:
+        # image_result_index = sorted_index[i, :]
+        # sorted_paths = []
+        # for value in image_result_index:
+        #     sorted_paths.append(paths[value])
+        # image_result = sorted_paths[-10:]
+
+        images_show = [query_image]
+        for image_re in same_cate_images:
             images_show.append(image_re)
-        #images_show = query_image + image_result
         for idx in np.arange(11):
             ax = fig.add_subplot(1, 11, idx + 1, xticks=[], yticks=[])
             image = mpimg.imread(images_show[idx])
