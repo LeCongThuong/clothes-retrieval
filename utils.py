@@ -327,7 +327,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                       epoch
                       )
     # sorted array according
-    for i, same_cate_images in enumerate(n_same_cate_images_total[:20]):
+    for i, same_cate_images in enumerate(n_same_cate_images_total[:10]):
         fig = plt.figure(figsize=(12, 48))
         query_image = eval_paths[i]
         # image_result_index = sorted_index[i, :]
