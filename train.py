@@ -197,15 +197,15 @@ def main():
                                     f'model_{save_epoch}.pth'))
 
         scheduler.step()
-
-        compute_predictions(args,
-                            model,
-                            paths,
-                            eval_paths,
-                            mapping_label_id,
-                            date_id,
-                            writer,
-                            epoch)
+        if epoch % 7 == 0:
+            compute_predictions(args,
+                                model,
+                                paths,
+                                eval_paths,
+                                mapping_label_id,
+                                date_id,
+                                writer,
+                                epoch)
 
 
 def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, epochs, writer, date_id, output_folder, scheduler):

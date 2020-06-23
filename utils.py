@@ -231,6 +231,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             embedding = model(batch['image'].cuda())
             embedding = embedding.cpu().detach().numpy()
             embeddings.append(embedding)
+    embeddings = np.concatenate(embeddings)
 
     test_dataset = ClothesDataset(eval_paths,
                                   mapping_label_id,
@@ -248,11 +249,12 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             test_embedding = model(batch['image'].cuda())
             test_embedding = test_embedding.cpu().detach().numpy()
             test_embeddings.append(test_embedding)
+    test_embeddings = np.concatenate(test_embeddings)
 
     eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
     eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
     dataset_labels = [path.split('/')[-1].split('~')[-4] for path in paths]
-    dataset_label_indexes = np.array(mapping_label_id[dataset_label] for dataset_label in dataset_labels)
+    dataset_label_indexes = np.array([mapping_label_id[dataset_label] for dataset_label in dataset_labels])
 
     dataset_index_matrix = dataset_label_indexes[np.newaxis, :] + np.zeros((len(eval_paths), 1))
 
@@ -301,15 +303,20 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                       epoch
                       )
     # sorted array according
-    fig = plt.figure(figsize=(12, 48))
+
     for i in range(10):
+        fig = plt.figure(figsize=(12, 48))
         query_image = eval_paths[i]
         image_result_index = sorted_index[i, :]
         sorted_paths = []
         for value in image_result_index:
             sorted_paths.append(paths[value])
         image_result = sorted_paths[-10:]
-        images_show = query_image + image_result
+        images_show = []
+        images_show.append(query_image)
+        for image_re in image_result:
+            images_show.append(image_re)
+        #images_show = query_image + image_result
         for idx in np.arange(11):
             ax = fig.add_subplot(1, 11, idx + 1, xticks=[], yticks=[])
             image = mpimg.imread(images_show[idx])
