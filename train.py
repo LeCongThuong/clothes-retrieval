@@ -247,7 +247,7 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
                           loss_ce.item(),
                           epoch * len(dataloader) + i)
 
-
+        #if (i % logging_step == 0) & (i > 0):
         running_avg_loss = np.mean(losses)
         running_avg_arcface_loss = np.mean(losses_arcface)
         running_avg_ce_loss = np.mean(losses_ce)
@@ -295,9 +295,9 @@ def triplet_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
                           epoch * len(dataloader) + i
                           )
 
-        if (i % logging_step == 0) & (i > 0):
-            running_avg_loss = np.mean(losses)
-            print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: loss {running_avg_loss}')
+        # if (i % logging_step == 0) & (i > 0):
+        running_avg_loss = np.mean(losses)
+        print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: loss {running_avg_loss}')
 
     average_loss = np.mean(losses)
     writer.add_scalar(f'loss-epoch',
