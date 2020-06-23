@@ -56,7 +56,7 @@ def parse_arguments():
     parser.add_argument('--fs_lr', type=float, default=8e-3)
     parser.add_argument('--wd', type=float, default=0.001)
     parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--start-epoch', type=int, default=0)
+    parser.add_argument('--start-epoch', type=int, default=10)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--num-workers', type=int, default=12)
 
