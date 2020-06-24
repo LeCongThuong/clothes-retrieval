@@ -56,7 +56,7 @@ def parse_arguments():
     parser.add_argument('--fs_lr', type=float, default=7e-4)
     parser.add_argument('--wd', type=float, default=0.001)
     parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--start-epoch', type=int, default=0)
+    parser.add_argument('--start-epoch', type=int, default=1)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--num-workers', type=int, default=12)
 
@@ -70,12 +70,12 @@ def parse_arguments():
     parser.add_argument('--checkpoint-period', type=int, default=2)
 
     parser.add_argument('--scheduler', type=str,
-                        choices=['multistep', 'cosine', 'warmup'], default='warmup')
+                        choices=['multistep', 'cosine', 'warmup'], default='cosine')
     parser.add_argument('--step-size', type=int, default=4)
     parser.add_argument('--gamma', type=float, default=0.1)
     parser.add_argument('--milestones', nargs='+', type=int)
     parser.add_argument('--lr-end', type=float, default=1e-6)
-    parser.add_argument('--warmup-epochs', type=int, default=2)
+    parser.add_argument('--warmup-epochs', type=int, default=0)
 
     args = parser.parse_args()
     return args
