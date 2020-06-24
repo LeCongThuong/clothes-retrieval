@@ -197,7 +197,7 @@ def main():
                                     f'model_{save_epoch}.pth'))
 
         scheduler.step()
-        if epoch % 7 == 0:
+        if epoch % 5 == 0:
             compute_predictions(args,
                                 model,
                                 paths,
