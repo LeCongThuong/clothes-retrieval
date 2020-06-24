@@ -97,7 +97,7 @@ def main():
     if args.checkpoint is not None:
         print('loading pre-trained weights and changing input size ...')
         checkpoint = torch.load(args.checkpoint)
-        start_epoch = checkpoint['epoch']
+        # start_epoch = checkpoint['epoch']
         if 'state_dict' in checkpoint.keys():
             backbone = checkpoint['state_dict']
         try:
