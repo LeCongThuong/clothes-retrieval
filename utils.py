@@ -227,6 +227,18 @@ def find_n_images_same_cate(given_cate: str, paths: list, sorted_index_list: lis
     return n_same_cate_images, n_image_types
 
 
+def calculate_similarity(eval_path, paths, embeddings, test_embedding):
+    eval_cate = eval_path.split('/')[-1].split('~')[2:4]
+    # eval_type = eval_path.split('/')[-1].split('~')[-4]
+    cate_path_index = []
+    for index, path in enumerate(paths):
+        path_cate = path.split('/')[-1].split('~')[2:4]
+        if eval_cate == path_cate:
+            cate_path_index.append(index)
+    cate_embeddings = embeddings[cate_path_index, :]
+    return cate_path_index, cosine_similarity(test_embedding, cate_embeddings)
+
+
 def compute_predictions(args, model, paths: list, eval_paths: list, mapping_label_id, date_id, writer:SummaryWriter, output_folder, epoch):
     model.eval()
     print("generating predictions ......")
@@ -284,9 +296,9 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
 
     dataset_index_matrix = dataset_label_indexes[np.newaxis, :] + np.zeros((len(eval_paths), 1))
 
-    csm = cosine_similarity(test_embeddings, embeddings)
-    sorted_index = np.argsort(csm)
-    sorted_res = np.array(list(map(lambda x, y: y[x], sorted_index, dataset_index_matrix)))
+    # csm = cosine_similarity(test_embeddings, embeddings)
+    # sorted_index = np.argsort(csm)
+    # sorted_res = np.array(list(map(lambda x, y: y[x], sorted_index, dataset_index_matrix)))
     acc_top_1 = 0
     acc_top_5 = 0
     acc_top_10 = 0
@@ -295,10 +307,13 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
     # list of list
     n_same_cate_images_total = []
     for i, eval_path in enumerate(eval_paths):
-        eval_cate = eval_path.split('/')[-1].split('~')[2:4]
+        # eval_cate = eval_path.split('/')[-1].split('~')[2:4]
         eval_type = eval_path.split('/')[-1].split('~')[-4]
-
-        n_same_cate_images, n_image_types = find_n_images_same_cate(eval_cate, paths, sorted_index[i], n=20)
+        cate_path_index, eval_path_csm = calculate_similarity(eval_path, paths, embeddings, test_embeddings[i])
+        new_paths = [paths[index] for index in cate_path_index]
+        sorted_eval_path_csm_index = np.argsort(eval_path_csm)
+        n_same_cate_images = [new_paths[index] for index in reversed(sorted_eval_path_csm_index)][20]
+        n_image_types = [image_name.split('/')[-1].split('~')[-4] for image_name in n_same_cate_images]
         n_same_cate_images_total.append(n_same_cate_images)
         if eval_type == n_image_types[0]:
             acc_top_1 += 1
