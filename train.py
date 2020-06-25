@@ -117,14 +117,14 @@ def main():
         optimizer = Adam([{'params': base_params},
                           {'params': params, "lr": args.fs_lr},
                           {'params': arcface_loss.parameters()}],
-                         lr=args.lr,
+                            lr=args.lr,
                          weight_decay=args.wd)
     else:
         optimizer = Adam([{'params': base_params},
                           {'params': params, "lr": args.fs_lr},
                           {'params': triplet_loss.parameters()}],
-                         lr=args.lr,
-                         weight_decay=args.wd)
+                           lr=args.lr,
+                           weight_decay=args.wd)
 
     # define scheduler
     scheduler = get_scheduler(args, optimizer)
@@ -183,7 +183,9 @@ def main():
 
             triplet_train(**params)
 
-        if (args.checkpoint_period != -1) & (args.checkpoint_period % (epoch+1) == 0):
+        if epoch <= args.warmup_epochs:
+            print("In warmup process, not save model")
+        if (args.checkpoint_period != -1) & ((epoch + 1) % args.checkpoint_period == 0):
             state = {
                 'state_dict': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
@@ -247,17 +249,16 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
                           loss_ce.item(),
                           epoch * len(dataloader) + i)
 
-        #if (i % logging_step == 0) & (i > 0):
         running_avg_loss = np.mean(losses)
         running_avg_arcface_loss = np.mean(losses_arcface)
-        #running_avg_ce_loss = np.mean(losses_ce)
-        print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: [total_loss {running_avg_loss}][arcface_loss {running_avg_arcface_loss}]]')
+        # running_avg_ce_loss = np.mean(losses_ce)
+        print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: [total_loss: {running_avg_loss}][arcface_loss: {running_avg_arcface_loss}]]')
 
     average_total_loss = np.mean(losses)
     average_arcface_loss = np.mean(losses_arcface)
     #average_ce_loss = np.mean(losses_ce)
 
-    writer.add_scalar(f'total=loss-epoch',
+    writer.add_scalar(f'total-loss-epoch',
                       average_total_loss,
                       epoch
                       )
