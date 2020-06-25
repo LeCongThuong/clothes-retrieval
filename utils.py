@@ -227,7 +227,7 @@ def find_n_images_same_cate(given_cate: str, paths: list, sorted_index_list: lis
     return n_same_cate_images, n_image_types
 
 
-def compute_predictions(args, model, paths: list, eval_paths: list, mapping_label_id, time_id, writer:SummaryWriter, epoch):
+def compute_predictions(args, model, paths: list, eval_paths: list, mapping_label_id, date_id, writer:SummaryWriter, output_folder, epoch):
     model.eval()
     print("generating predictions ......")
 
@@ -250,6 +250,10 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             embeddings.append(embedding)
     embeddings = np.concatenate(embeddings)
 
+    np.save(os.path.join(output_folder,
+                         f'embeddings_{date_id}.npy'),
+            embeddings)
+
     test_dataset = ClothesDataset(eval_paths,
                                   mapping_label_id,
                                   data_transform_test,
@@ -260,6 +264,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                                  shuffle=False,
                                  batch_size=args.batch_size)
 
+
     test_embeddings = []
     for batch in tqdm(test_dataloader, total=len(test_dataloader)):
         with torch.no_grad():
@@ -267,6 +272,10 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             test_embedding = test_embedding.cpu().detach().numpy()
             test_embeddings.append(test_embedding)
     test_embeddings = np.concatenate(test_embeddings)
+
+    np.save(os.path.join(output_folder,
+                         f'test_embeddings_{date_id}.npy'),
+            embeddings)
 
     eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
     eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
@@ -328,7 +337,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                       )
     # sorted array according
     for i, same_cate_images in enumerate(n_same_cate_images_total[:10]):
-        fig = plt.figure(figsize=(12, 48))
+        fig = plt.figure(figsize=(24, 48))
         query_image = eval_paths[i]
         # image_result_index = sorted_index[i, :]
         # sorted_paths = []

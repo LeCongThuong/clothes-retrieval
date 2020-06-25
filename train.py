@@ -150,64 +150,65 @@ def main():
     model.train()
 
     # start training loop
-    for epoch in tqdm(range(start_epoch, args.epochs + start_epoch)):
-        if args.loss == 'arcface':
-            params = {
-                'model': model,
-                'dataloader': dataloader,
-                'optimizer': optimizer,
-                'criterion': arcface_loss,
-                'logging_step': args.logging_step,
-                'epoch': epoch,
-                'epochs': args.epochs,
-                'writer': writer,
-                'date_id': date_id,
-                'scheduler': scheduler,
-                'output_folder': output_folder
-            }
-            arcface_train(**params)
-        else:
-            params = {
-                'model': model,
-                'dataloader': dataloader,
-                'optimizer': optimizer,
-                'criterion': triplet_loss,
-                'logging_step': args.logging_step,
-                'epoch': epoch,
-                'epochs': args.epochs,
-                'writer': writer,
-                'date_id': date_id,
-                'scheduler': scheduler,
-                'output_folder': output_folder
-            }
-
-            triplet_train(**params)
-
-        if epoch <= args.warmup_epochs:
-            print("In warmup process, not save model")
-        if (args.checkpoint_period != -1) & ((epoch + 1) % args.checkpoint_period == 0):
-            state = {
-                'state_dict': model.state_dict(),
-                'optimizer': optimizer.state_dict(),
-                'epoch': epoch,
-                'scheduler': scheduler.state_dict()
-
-            }
-            save_epoch = epoch % 3
-            torch.save(state,
-                       os.path.join(output_folder,
-                                    f'model_{save_epoch}.pth'))
-
-        scheduler.step()
-        if epoch % 5 == 0:
-            compute_predictions(args,
-                                model,
-                                paths,
-                                eval_paths,
-                                mapping_label_id,
-                                date_id,
-                                writer,
-                                epoch)
+    # for epoch in tqdm(range(start_epoch, args.epochs + start_epoch)):
+    #     if args.loss == 'arcface':
+    #         params = {
+    #             'model': model,
+    #             'dataloader': dataloader,
+    #             'optimizer': optimizer,
+    #             'criterion': arcface_loss,
+    #             'logging_step': args.logging_step,
+    #             'epoch': epoch,
+    #             'epochs': args.epochs,
+    #             'writer': writer,
+    #             'date_id': date_id,
+    #             'scheduler': scheduler,
+    #             'output_folder': output_folder
+    #         }
+    #         arcface_train(**params)
+    #     else:
+    #         params = {
+    #             'model': model,
+    #             'dataloader': dataloader,
+    #             'optimizer': optimizer,
+    #             'criterion': triplet_loss,
+    #             'logging_step': args.logging_step,
+    #             'epoch': epoch,
+    #             'epochs': args.epochs,
+    #             'writer': writer,
+    #             'date_id': date_id,
+    #             'scheduler': scheduler,
+    #             'output_folder': output_folder
+    #         }
+    #
+    #         triplet_train(**params)
+    #
+    #     if epoch <= args.warmup_epochs:
+    #         print("In warmup process, not save model")
+    #     if (args.checkpoint_period != -1) & ((epoch + 1) % args.checkpoint_period == 0):
+    #         state = {
+    #             'state_dict': model.state_dict(),
+    #             'optimizer': optimizer.state_dict(),
+    #             'epoch': epoch,
+    #             'scheduler': scheduler.state_dict()
+    #
+    #         }
+    #         save_epoch = epoch % 3
+    #         torch.save(state,
+    #                    os.path.join(output_folder,
+    #                                 f'model_{save_epoch}.pth'))
+    #
+    #     scheduler.step()
+    #     if epoch % 5 == 0:
+    compute_predictions(args,
+                        model,
+                        paths,
+                        eval_paths,
+                        mapping_label_id,
+                        date_id,
+                        writer,
+                        output_folder,
+                        1)
 
 
 def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, epochs, writer, date_id, output_folder, scheduler):
