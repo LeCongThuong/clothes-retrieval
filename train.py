@@ -193,7 +193,7 @@ def main():
                 'scheduler': scheduler.state_dict()
 
             }
-            save_epoch = epoch % 3
+            save_epoch = (epoch + 2) % 3
             torch.save(state,
                        os.path.join(output_folder,
                                     f'model_{save_epoch}.pth'))
