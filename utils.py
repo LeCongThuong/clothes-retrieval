@@ -52,8 +52,8 @@ def parse_arguments():
     parser.add_argument('-k', type=int, default=4)
     parser.add_argument('--sampler', type=int, default=2, choices=[1, 2])
 
-    parser.add_argument('--lr', type=float, default=2e-5)
-    parser.add_argument('--fs_lr', type=float, default=6e-5)
+    parser.add_argument('--lr', type=float, default=2e-4)
+    parser.add_argument('--fs_lr', type=float, default=6e-4)
     parser.add_argument('--wd', type=float, default=0.00001)
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--start-epoch', type=int, default=1)
