@@ -275,7 +275,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
 
     np.save(os.path.join(output_folder,
                          f'test_embeddings_{date_id}.npy'),
-            embeddings)
+            test_embeddings)
 
     eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
     eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
