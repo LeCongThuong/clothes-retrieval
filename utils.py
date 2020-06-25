@@ -236,7 +236,7 @@ def calculate_similarity(eval_path, paths, embeddings, test_embedding):
         if eval_cate == path_cate:
             cate_path_index.append(index)
     cate_embeddings = embeddings[cate_path_index, :]
-    return cate_path_index, cosine_similarity(test_embedding, cate_embeddings)
+    return cate_path_index, cosine_similarity(test_embedding[np.newaxis, :], cate_embeddings)
 
 
 def compute_predictions(args, model, paths: list, eval_paths: list, mapping_label_id, date_id, writer:SummaryWriter, output_folder, epoch):
@@ -312,7 +312,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
         cate_path_index, eval_path_csm = calculate_similarity(eval_path, paths, embeddings, test_embeddings[i])
         new_paths = [paths[index] for index in cate_path_index]
         sorted_eval_path_csm_index = np.argsort(eval_path_csm)
-        n_same_cate_images = [new_paths[index] for index in reversed(sorted_eval_path_csm_index)][20]
+        n_same_cate_images = [new_paths[index] for index in reversed(sorted_eval_path_csm_index[0])][:20]
         n_image_types = [image_name.split('/')[-1].split('~')[-4] for image_name in n_same_cate_images]
         n_same_cate_images_total.append(n_same_cate_images)
         if eval_type == n_image_types[0]:
