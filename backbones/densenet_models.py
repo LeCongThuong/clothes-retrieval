@@ -30,13 +30,13 @@ class DenseNetModels(nn.Module):
 
     def forward(self, x):
         x = self.model.features(x)
-        if self.gap == 1:
-            x = self.pooling_layer(x)
-            x = x.view(x.size(0), -1)
+        # if self.gap == 1:
+        x = self.pooling_layer(x)
+        x = x.view(x.size(0), -1)
 
-        elif self.gap == 0:
-            x = x.view(x.size(0), -1)
-            x = self.dropout(x)
+        # elif self.gap == 0:
+        #     x = x.view(x.size(0), -1)
+        #     x = self.dropout(x)
 
         x = self.model.classifier(x)
         self.features = self.l2_norm(x)
@@ -48,7 +48,7 @@ class DenseNetModels(nn.Module):
     def _get_output_conv(self, shape):
         x = torch.rand(shape)
         x = self.model.features(x)
-        #if self.gap == 1:
+        # if self.gap == 1:
         output_conv_shape = x.size(1)
         # elif self.gap == 0:
         #     x = x.view(x.size(0), -1)

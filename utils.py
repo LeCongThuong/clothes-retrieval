@@ -52,9 +52,9 @@ def parse_arguments():
     parser.add_argument('-k', type=int, default=4)
     parser.add_argument('--sampler', type=int, default=2, choices=[1, 2])
 
-    parser.add_argument('--lr', type=float, default=3e-4)
-    parser.add_argument('--fs_lr', type=float, default=7e-4)
-    parser.add_argument('--wd', type=float, default=0.001)
+    parser.add_argument('--lr', type=float, default=2e-5)
+    parser.add_argument('--fs_lr', type=float, default=6e-5)
+    parser.add_argument('--wd', type=float, default=0.00001)
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--start-epoch', type=int, default=1)
     parser.add_argument('--batch-size', type=int, default=64)
@@ -70,12 +70,12 @@ def parse_arguments():
     parser.add_argument('--checkpoint-period', type=int, default=2)
 
     parser.add_argument('--scheduler', type=str,
-                        choices=['multistep', 'cosine', 'warmup'], default='cosine')
+                        choices=['multistep', 'cosine', 'warmup'], default='warmup')
     parser.add_argument('--step-size', type=int, default=4)
     parser.add_argument('--gamma', type=float, default=0.1)
     parser.add_argument('--milestones', nargs='+', type=int)
     parser.add_argument('--lr-end', type=float, default=1e-6)
-    parser.add_argument('--warmup_epochs', type=int, default=0)
+    parser.add_argument('--warmup_epochs', type=int, default=2)
 
     args = parser.parse_args()
     return args
@@ -227,7 +227,19 @@ def find_n_images_same_cate(given_cate: str, paths: list, sorted_index_list: lis
     return n_same_cate_images, n_image_types
 
 
-def compute_predictions(args, model, paths: list, eval_paths: list, mapping_label_id, time_id, writer:SummaryWriter, epoch):
+def calculate_similarity(eval_path, paths, embeddings, test_embedding):
+    eval_cate = eval_path.split('/')[-1].split('~')[2:4]
+    # eval_type = eval_path.split('/')[-1].split('~')[-4]
+    cate_path_index = []
+    for index, path in enumerate(paths):
+        path_cate = path.split('/')[-1].split('~')[2:4]
+        if eval_cate == path_cate:
+            cate_path_index.append(index)
+    cate_embeddings = embeddings[cate_path_index, :]
+    return cate_path_index, cosine_similarity(test_embedding[np.newaxis, :], cate_embeddings)
+
+
+def compute_predictions(args, model, paths: list, eval_paths: list, mapping_label_id, date_id, writer:SummaryWriter, output_folder, epoch):
     model.eval()
     print("generating predictions ......")
 
@@ -250,6 +262,10 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             embeddings.append(embedding)
     embeddings = np.concatenate(embeddings)
 
+    # np.save(os.path.join(output_folder,
+    #                      f'embeddings_{date_id}.npy'),
+    #         embeddings)
+
     test_dataset = ClothesDataset(eval_paths,
                                   mapping_label_id,
                                   data_transform_test,
@@ -260,6 +276,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                                  shuffle=False,
                                  batch_size=args.batch_size)
 
+
     test_embeddings = []
     for batch in tqdm(test_dataloader, total=len(test_dataloader)):
         with torch.no_grad():
@@ -268,16 +285,20 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             test_embeddings.append(test_embedding)
     test_embeddings = np.concatenate(test_embeddings)
 
-    eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
-    eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
-    dataset_labels = [path.split('/')[-1].split('~')[-4] for path in paths]
-    dataset_label_indexes = np.array([mapping_label_id[dataset_label] for dataset_label in dataset_labels])
+    # np.save(os.path.join(output_folder,
+    #                      f'test_embeddings_{date_id}.npy'),
+    #         test_embeddings)
 
-    dataset_index_matrix = dataset_label_indexes[np.newaxis, :] + np.zeros((len(eval_paths), 1))
+    # eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
+    # eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
+    # dataset_labels = [path.split('/')[-1].split('~')[-4] for path in paths]
+    # dataset_label_indexes = np.array([mapping_label_id[dataset_label] for dataset_label in dataset_labels])
 
-    csm = cosine_similarity(test_embeddings, embeddings)
-    sorted_index = np.argsort(csm)
-    sorted_res = np.array(list(map(lambda x, y: y[x], sorted_index, dataset_index_matrix)))
+    # dataset_index_matrix = dataset_label_indexes[np.newaxis, :] + np.zeros((len(eval_paths), 1))
+
+    # csm = cosine_similarity(test_embeddings, embeddings)
+    # sorted_index = np.argsort(csm)
+    # sorted_res = np.array(list(map(lambda x, y: y[x], sorted_index, dataset_index_matrix)))
     acc_top_1 = 0
     acc_top_5 = 0
     acc_top_10 = 0
@@ -286,10 +307,13 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
     # list of list
     n_same_cate_images_total = []
     for i, eval_path in enumerate(eval_paths):
-        eval_cate = eval_path.split('/')[-1].split('~')[2:4]
+        # eval_cate = eval_path.split('/')[-1].split('~')[2:4]
         eval_type = eval_path.split('/')[-1].split('~')[-4]
-
-        n_same_cate_images, n_image_types = find_n_images_same_cate(eval_cate, paths, sorted_index[i], n=20)
+        cate_path_index, eval_path_csm = calculate_similarity(eval_path, paths, embeddings, test_embeddings[i])
+        new_paths = [paths[index] for index in cate_path_index]
+        sorted_eval_path_csm_index = np.argsort(eval_path_csm)
+        n_same_cate_images = [new_paths[index] for index in reversed(sorted_eval_path_csm_index[0])][:20]
+        n_image_types = [image_name.split('/')[-1].split('~')[-4] for image_name in n_same_cate_images]
         n_same_cate_images_total.append(n_same_cate_images)
         if eval_type == n_image_types[0]:
             acc_top_1 += 1
@@ -328,7 +352,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                       )
     # sorted array according
     for i, same_cate_images in enumerate(n_same_cate_images_total[:10]):
-        fig = plt.figure(figsize=(12, 48))
+        fig = plt.figure(figsize=(24, 48))
         query_image = eval_paths[i]
         # image_result_index = sorted_index[i, :]
         # sorted_paths = []
@@ -344,7 +368,6 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             image = mpimg.imread(images_show[idx])
             plt.imshow(image)
         writer.add_figure("Query_{}".format(i), fig, global_step=epoch)
-
 
 
 
