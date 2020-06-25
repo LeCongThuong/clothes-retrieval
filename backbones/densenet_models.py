@@ -42,7 +42,7 @@ class DenseNetModels(nn.Module):
         self.features = self.l2_norm(x)
 
         # Multiply by alpha = 10 as suggested in https://arxiv.org/pdf/1703.09507.pdf
-        self.features = self.features * self.alpha
+        self.features = self.features * 40
         return self.features
 
     def _get_output_conv(self, shape):
