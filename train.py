@@ -135,7 +135,7 @@ def main():
                                momentum=0.9,
                                weight_decay=args.wd)
         else:
-            optimizer = Adam([{'params': base_params},
+            optimizer = SGD([{'params': base_params},
                               {'params': params, "lr": args.fs_lr},
                               {'params': triplet_loss.parameters()}],
                                lr=args.lr,
