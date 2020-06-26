@@ -289,12 +289,12 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                          f'test_embeddings_{date_id}.npy'),
             test_embeddings)
 
-    eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
-    eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
-    dataset_labels = [path.split('/')[-1].split('~')[-4] for path in paths]
-    dataset_label_indexes = np.array([mapping_label_id[dataset_label] for dataset_label in dataset_labels])
-
-    dataset_index_matrix = dataset_label_indexes[np.newaxis, :] + np.zeros((len(eval_paths), 1))
+    # eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
+    # eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
+    # dataset_labels = [path.split('/')[-1].split('~')[-4] for path in paths]
+    # dataset_label_indexes = np.array([mapping_label_id[dataset_label] for dataset_label in dataset_labels])
+    #
+    # dataset_index_matrix = dataset_label_indexes[np.newaxis, :] + np.zeros((len(eval_paths), 1))
 
     # csm = cosine_similarity(test_embeddings, embeddings)
     # sorted_index = np.argsort(csm)
