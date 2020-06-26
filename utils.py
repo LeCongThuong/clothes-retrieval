@@ -59,7 +59,7 @@ def parse_arguments():
     parser.add_argument('--start-epoch', type=int, default=0)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--num-workers', type=int, default=12)
-
+    parser.add_argument('--optimizer_choice', type=str, default='adam', choices=['sgd', 'adam'])
     parser.add_argument('--logging-step', type=int, default=20)
 
     parser.add_argument('--checkpoint', type=str, default=None)

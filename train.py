@@ -12,6 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 import torch
 from torch.optim import Adam
+from torch.optim import SGD
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -112,19 +113,34 @@ def main():
     my_list = ['model.classification_layer.weight', 'model.classification_layer.bias']
     params = list(map(lambda x: x[1], list(filter(lambda kv: kv[0] in my_list, model.named_parameters()))))
     base_params = list(map(lambda x: x[1], list(filter(lambda kv: kv[0] not in my_list, model.named_parameters()))))
-
-    if args.loss == 'arcface':
-        optimizer = Adam([{'params': base_params},
-                          {'params': params, "lr": args.fs_lr},
-                          {'params': arcface_loss.parameters()}],
-                            lr=args.lr,
-                         weight_decay=args.wd)
+    if args.optimizer_choice == 'adam':
+        if args.loss == 'arcface':
+            optimizer = Adam([{'params': base_params},
+                              {'params': params, "lr": args.fs_lr},
+                              {'params': arcface_loss.parameters()}],
+                                lr=args.lr,
+                             weight_decay=args.wd)
+        else:
+            optimizer = Adam([{'params': base_params},
+                              {'params': params, "lr": args.fs_lr},
+                              {'params': triplet_loss.parameters()}],
+                               lr=args.lr,
+                               weight_decay=args.wd)
     else:
-        optimizer = Adam([{'params': base_params},
-                          {'params': params, "lr": args.fs_lr},
-                          {'params': triplet_loss.parameters()}],
-                           lr=args.lr,
-                           weight_decay=args.wd)
+        if args.loss == 'arcface':
+            optimizer = SGD([{'params': base_params},
+                              {'params': params, "lr": args.fs_lr},
+                              {'params': arcface_loss.parameters()}],
+                               lr=args.lr,
+                               momentum=0.9,
+                               weight_decay=args.wd)
+        else:
+            optimizer = Adam([{'params': base_params},
+                              {'params': params, "lr": args.fs_lr},
+                              {'params': triplet_loss.parameters()}],
+                               lr=args.lr,
+                               momentum=0.9,
+                               weight_decay=args.wd)
 
     # define scheduler
     scheduler = get_scheduler(args, optimizer)
