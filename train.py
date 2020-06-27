@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torch.optim.lr_scheduler import MultiStepLR, CosineAnnealingLR
 import glob
+from hardmining_loss import HardminingLoss
 
 from backbones.resnet_models import ResNetModels
 from backbones.densenet_models import DenseNetModels
@@ -85,12 +86,15 @@ def main():
     if args.loss == 'arcface':
         arcface_loss = ArcMarginProduct(args.embedding_dim, num_classes)
         arcface_loss.to(device)
-    else:
+    elif args.loss == 'triplet':
         if args.margin == -1:
             triplet_loss = TripletLoss(margin='soft', sample=False)
         else:
             triplet_loss = TripletLoss(margin=args.margin, sample=False)
         triplet_loss.to(device)
+    elif args.loss == 'hardmining':
+        hardmining_loss = HardminingLoss(args.embedding_dim, num_classes)
+        hardmining_loss.to(device)
     # set init epoch
     start_epoch = args.start_epoch
     # load checkpoint if args.weights parameter is not None
@@ -117,14 +121,21 @@ def main():
         optimizer = Adam([{'params': base_params},
                           {'params': params, "lr": args.fs_lr},
                           {'params': arcface_loss.parameters()}],
-                            lr=args.lr,
+                         lr=args.lr,
                          weight_decay=args.wd)
-    else:
+    elif args.loss == 'triplet':
         optimizer = Adam([{'params': base_params},
                           {'params': params, "lr": args.fs_lr},
                           {'params': triplet_loss.parameters()}],
                            lr=args.lr,
                            weight_decay=args.wd)
+
+    elif args.loss == 'hardmining_loss':
+        optimizer = Adam([{'params': base_params},
+                      {'params': params, "lr": args.fs_lr},
+                      {'params': hardmining_loss.parameters()}],
+                     lr=args.lr,
+                     weight_decay=args.wd)
 
     # define scheduler
     scheduler = get_scheduler(args, optimizer)
@@ -166,7 +177,7 @@ def main():
                 'output_folder': output_folder
             }
             arcface_train(**params)
-        else:
+        elif args.loss == 'triplet':
             params = {
                 'model': model,
                 'dataloader': dataloader,
@@ -180,8 +191,21 @@ def main():
                 'scheduler': scheduler,
                 'output_folder': output_folder
             }
-
-            triplet_train(**params)
+        elif args.loss == 'hardmining':
+            params = {
+                'model': model,
+                'dataloader': dataloader,
+                'optimizer': optimizer,
+                'criterion': arcface_loss,
+                'logging_step': args.logging_step,
+                'epoch': epoch,
+                'epochs': args.epochs,
+                'writer': writer,
+                'date_id': date_id,
+                'scheduler': scheduler,
+                'output_folder': output_folder
+            }
+            hardmining_train(**params)
 
         if epoch <= args.warmup_epochs:
             print("In warmup process, not save model")
@@ -256,7 +280,6 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
 
     average_total_loss = np.mean(losses)
     average_arcface_loss = np.mean(losses_arcface)
-    #average_ce_loss = np.mean(losses_ce)
 
     writer.add_scalar(f'total-loss-epoch',
                       average_total_loss,
@@ -267,11 +290,6 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
                       average_arcface_loss,
                       epoch
                       )
-
-    # writer.add_scalar(f'ce-loss-epoch',
-    #                   average_ce_loss,
-    #                   epoch
-    #                   )
 
 
 def triplet_train(model, dataloader, optimizer, criterion, logging_step, epoch, epochs, writer, date_id, output_folder, scheduler):
@@ -303,6 +321,40 @@ def triplet_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
     average_loss = np.mean(losses)
     writer.add_scalar(f'loss-epoch',
                       average_loss,
+                      epoch
+                      )
+
+
+def hardmining_train(model, dataloader, optimizer, criterion, logging_step, epoch, epochs, writer, date_id, output_folder, scheduler):
+    losses = []
+
+    for i, batch in tqdm(enumerate(dataloader), total=len(dataloader), leave=False):
+        images = batch['image'].cuda()
+        targets = batch['label'].cuda()
+        optimizer.zero_grad()
+        features, logits = model.forward_classifier(images)
+
+        loss = criterion(features, targets)
+        loss.backward()
+
+        current_lr = get_lr(optimizer)
+
+        optimizer.step()
+        losses.append(loss.item())
+
+        writer.add_scalar(f'loss',
+                          loss.item(),
+                          epoch * len(dataloader) + i
+                          )
+
+        running_avg_loss = np.mean(losses)
+
+        print(f'[Epoch {epoch}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: [loss: {running_avg_loss}]')
+
+    average_total_loss = np.mean(losses)
+
+    writer.add_scalar(f'loss-epoch',
+                      average_total_loss,
                       epoch
                       )
 

@@ -45,7 +45,7 @@ def parse_arguments():
     parser.add_argument('--alpha', type=int, default=8)
     parser.add_argument('--pretrained', type=int, choices=[0, 1], default=0)
     parser.add_argument('--image-size', type=int, default=224)
-    parser.add_argument('--loss', default='arcface', choices=['arcface', 'triplet'])
+    parser.add_argument('--loss', default='hardmining', choices=['arcface', 'triplet', 'hardmining'])
 
     parser.add_argument('--margin', type=float, default=-1)
     parser.add_argument('-p', type=int, default=16)
@@ -56,7 +56,7 @@ def parse_arguments():
     parser.add_argument('--fs_lr', type=float, default=6e-4)
     parser.add_argument('--wd', type=float, default=0.00001)
     parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--start-epoch', type=int, default=1)
+    parser.add_argument('--start-epoch', type=int, default=0)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--num-workers', type=int, default=12)
 
@@ -70,12 +70,12 @@ def parse_arguments():
     parser.add_argument('--checkpoint-period', type=int, default=2)
 
     parser.add_argument('--scheduler', type=str,
-                        choices=['multistep', 'cosine', 'warmup'], default='warmup')
+                        choices=['multistep', 'cosine', 'warmup'], default='cosine')
     parser.add_argument('--step-size', type=int, default=4)
     parser.add_argument('--gamma', type=float, default=0.1)
     parser.add_argument('--milestones', nargs='+', type=int)
     parser.add_argument('--lr-end', type=float, default=1e-6)
-    parser.add_argument('--warmup_epochs', type=int, default=2)
+    parser.add_argument('--warmup_epochs', type=int, default=0)
 
     args = parser.parse_args()
     return args
