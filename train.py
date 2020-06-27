@@ -185,7 +185,7 @@ def main():
 
         if epoch <= args.warmup_epochs:
             print("In warmup process, not save model")
-        if (args.checkpoint_period != -1) & ((epoch + 1) % args.checkpoint_period == 0):
+        if (args.checkpoint_period != -1) & (epoch % args.checkpoint_period == 0):
             state = {
                 'state_dict': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
@@ -193,7 +193,7 @@ def main():
                 'scheduler': scheduler.state_dict()
 
             }
-            save_epoch = (epoch + 2) % 3
+            save_epoch = epoch % 3
             torch.save(state,
                        os.path.join(output_folder,
                                     f'model_{save_epoch}.pth'))
@@ -252,7 +252,7 @@ def arcface_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
         running_avg_loss = np.mean(losses)
         running_avg_arcface_loss = np.mean(losses_arcface)
         # running_avg_ce_loss = np.mean(losses_ce)
-        print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: [total_loss: {running_avg_loss}][arcface_loss: {running_avg_arcface_loss}]]')
+        print(f'[Epoch {epoch}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: [total_loss: {running_avg_loss}][arcface_loss: {running_avg_arcface_loss}]]')
 
     average_total_loss = np.mean(losses)
     average_arcface_loss = np.mean(losses_arcface)
@@ -298,7 +298,7 @@ def triplet_train(model, dataloader, optimizer, criterion, logging_step, epoch, 
 
         # if (i % logging_step == 0) & (i > 0):
         running_avg_loss = np.mean(losses)
-        print(f'[Epoch {epoch+1}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: loss {running_avg_loss}')
+        print(f'[Epoch {epoch}][Batch {i} / {len(dataloader)}][lr: {current_lr}]: loss {running_avg_loss}')
 
     average_loss = np.mean(losses)
     writer.add_scalar(f'loss-epoch',
