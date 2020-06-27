@@ -128,11 +128,11 @@ def main():
 
     # define scheduler
     scheduler = get_scheduler(args, optimizer)
-    # if args.checkpoint is not None:
-    # #    weights = torch.load(args.weights)
-    #     print('loading pre-trained scheduler and optimizer state ...')
-    #     optimizer.load_state_dict(checkpoint['optimizer'])
-    #     scheduler.load_state_dict(checkpoint['scheduler'])
+    if args.checkpoint is not None:
+    #    weights = torch.load(args.weights)
+        print('loading pre-trained scheduler and optimizer state ...')
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        scheduler.load_state_dict(checkpoint['scheduler'])
 
     dataset = ClothesDataset(paths=paths, mapping_label_id=mapping_label_id, transform=data_transform)
 
