@@ -306,6 +306,8 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
 
     # list of list
     n_same_cate_images_total = []
+    is_prediction_true_list = []
+    index_same_type_list = []
     for i, eval_path in enumerate(eval_paths):
         # eval_cate = eval_path.split('/')[-1].split('~')[2:4]
         eval_type = eval_path.split('/')[-1].split('~')[-4]
@@ -323,6 +325,11 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             acc_top_10 += 1
         if eval_type in n_image_types[:20]:
             acc_top_20 += 1
+            index_same_type = [eval_type == image_type for image_type in n_image_types[:20]]
+            index_same_type_list.append(index_same_type)
+            is_prediction_true_list.append(True)
+        else:
+            is_prediction_true_list.append(False)
 
     print("---------------------------------------------")
     print("acc_top_1: ", acc_top_1 / len(eval_paths))
@@ -351,8 +358,8 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                       epoch
                       )
     # sorted array according
-    for i, same_cate_images in enumerate(n_same_cate_images_total[:10]):
-        fig = plt.figure(figsize=(24, 48))
+    for i, same_cate_images in enumerate(n_same_cate_images_total[:100]):
+        fig = plt.figure(figsize=(14, 60))
         query_image = eval_paths[i]
         # image_result_index = sorted_index[i, :]
         # sorted_paths = []
@@ -363,11 +370,16 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
         images_show = [query_image]
         for image_re in same_cate_images:
             images_show.append(image_re)
-        for idx in np.arange(11):
+        is_start = True
+        for idx in np.arange(20):
             ax = fig.add_subplot(1, 11, idx + 1, xticks=[], yticks=[])
             image = mpimg.imread(images_show[idx])
+            if is_start:
+                ax.set_title("Query")
+                is_start = False
+            ax.set_title(int(index_same_type_list[i][idx]))
             plt.imshow(image)
-        writer.add_figure("Query_{}".format(i), fig, global_step=epoch)
+        writer.add_figure("Query_{}_{}".format(i, is_prediction_true_list(i)), fig, global_step=epoch)
 
 
 
