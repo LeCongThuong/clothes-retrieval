@@ -17,7 +17,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torch.optim.lr_scheduler import MultiStepLR, CosineAnnealingLR
 import glob
-from hardmining_loss import HardminingLoss
+from losses.hardmining_loss import HardminingLoss
 
 from backbones.resnet_models import ResNetModels
 from backbones.densenet_models import DenseNetModels

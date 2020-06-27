@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from arcface import ArcMarginProduct
+from losses.arcface import ArcMarginProduct
 
 
 class HardminingLoss(nn.Module):
@@ -14,7 +14,8 @@ class HardminingLoss(nn.Module):
         self.arcface = ArcMarginProduct(in_features, out_features, s, m, easy_margin)
 
     def forward(self, input, label):
-        out_arcface = self.arcface(input, label)
+        temp = self.arcface(input, label)
+        out_arcface = nn.CrossEntropyLoss()(temp, label)
         x = self.beta * out_arcface
         y = self.A * (x - self.B)
         z = torch.sigmoid(y)
