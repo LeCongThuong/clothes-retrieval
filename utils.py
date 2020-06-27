@@ -43,7 +43,7 @@ def parse_arguments():
     parser.add_argument('--embedding-dim', type=int, default=256)
     parser.add_argument('--dropout', type=float, default=0.4)
     parser.add_argument('--alpha', type=int, default=8)
-    parser.add_argument('--pretrained', type=int, choices=[0, 1], default=0)
+    parser.add_argument('--pretrained', type=int, choices=[0, 1], default=1)
     parser.add_argument('--image-size', type=int, default=224)
     parser.add_argument('--loss', default='hardmining', choices=['arcface', 'triplet', 'hardmining'])
 
