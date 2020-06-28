@@ -325,11 +325,11 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             acc_top_10 += 1
         if eval_type in n_image_types[:20]:
             acc_top_20 += 1
-            index_same_type = [eval_type == image_type for image_type in n_image_types[:20]]
-            index_same_type_list.append(index_same_type)
             is_prediction_true_list.append(True)
         else:
             is_prediction_true_list.append(False)
+        index_same_type = [eval_type == image_type for image_type in n_image_types[:20]]
+        index_same_type_list.append(index_same_type)
 
     print("---------------------------------------------")
     print("acc_top_1: ", acc_top_1 / len(eval_paths))
@@ -377,9 +377,10 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             if is_start:
                 ax.set_title("Query")
                 is_start = False
-            ax.set_title(int(index_same_type_list[i][idx]))
+            else:
+                ax.set_title(int(index_same_type_list[i][idx - 1]))
             plt.imshow(image)
-        writer.add_figure("Query_{}_{}".format(i, is_prediction_true_list(i)), fig, global_step=epoch)
+        writer.add_figure("Query_{}_{}".format(i, is_prediction_true_list[i]), fig, global_step=epoch)
 
 
 
