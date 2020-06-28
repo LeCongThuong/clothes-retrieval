@@ -371,8 +371,8 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
         for image_re in same_cate_images:
             images_show.append(image_re)
         is_start = True
-        for idx in np.arange(20):
-            ax = fig.add_subplot(1, 11, idx + 1, xticks=[], yticks=[])
+        for idx in np.arange(21):
+            ax = fig.add_subplot(1, 21, idx + 1, xticks=[], yticks=[])
             image = mpimg.imread(images_show[idx])
             if is_start:
                 ax.set_title("Query")
