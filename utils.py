@@ -377,7 +377,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             else:
                 ax.set_title(int(index_same_type_list[i][idx - 1]))
             plt.imshow(image)
-        writer.add_figure("Query_{}_{}".format(i, is_prediction_true_list[i]), fig, global_step=epoch)
+        writer.add_figure("Query_{}".format(i), fig, global_step=epoch)
 
 
 
