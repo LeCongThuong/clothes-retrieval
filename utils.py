@@ -272,9 +272,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
     test_dataloader = DataLoader(test_dataset,
                                  num_workers=11,
                                  shuffle=False,
-                                 batch_size=args.batch_size)
-
-
+                                 batch_size=1)
 
     test_embeddings = []
     for batch in tqdm(test_dataloader, total=len(test_dataloader)):
@@ -316,48 +314,48 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
         n_same_cate_images = [new_paths[index] for index in reversed(sorted_eval_path_csm_index[0])][:20]
         n_image_types = [image_name.split('/')[-1].split('~')[-4] for image_name in n_same_cate_images]
         n_same_cate_images_total.append(n_same_cate_images)
-        if eval_type == n_image_types[0]:
-            acc_top_1 += 1
-        if eval_type in n_image_types[: 5]:
-            acc_top_5 += 1
-        if eval_type in n_image_types[:10]:
-            acc_top_10 += 1
-        if eval_type in n_image_types[:20]:
-            acc_top_20 += 1
-            is_prediction_true_list.append(True)
-        else:
-            is_prediction_true_list.append(False)
+        # if eval_type == n_image_types[0]:
+        #     acc_top_1 += 1
+        # if eval_type in n_image_types[: 5]:
+        #     acc_top_5 += 1
+        # if eval_type in n_image_types[:10]:
+        #     acc_top_10 += 1
+        # if eval_type in n_image_types[:20]:
+        #     acc_top_20 += 1
+        #     is_prediction_true_list.append(True)
+        # else:
+        #     is_prediction_true_list.append(False)
         index_same_type = [eval_type == image_type for image_type in n_image_types[:20]]
         index_same_type_list.append(index_same_type)
 
-    print("---------------------------------------------")
-    print("acc_top_1: ", acc_top_1 / len(eval_paths))
-    print("acc_top_5: ", acc_top_5 / len(eval_paths))
-    print("acc_top_10: ", acc_top_10 / len(eval_paths))
-    print("acc_top_20: ", acc_top_20 / len(eval_paths))
-    print("---------------------------------------------")
-    print("predictions generated...")
-    writer.add_scalar(f'accuracy_top_1',
-                      acc_top_1,
-                      epoch
-                      )
-
-    writer.add_scalar(f'accuracy_top_5',
-                      acc_top_5,
-                      epoch
-                      )
-
-    writer.add_scalar(f'accuracy_top_10',
-                      acc_top_10,
-                      epoch
-                      )
-
-    writer.add_scalar(f'accuracy_top_20',
-                      acc_top_20,
-                      epoch
-                      )
+    # print("---------------------------------------------")
+    # print("acc_top_1: ", acc_top_1 / len(eval_paths))
+    # print("acc_top_5: ", acc_top_5 / len(eval_paths))
+    # print("acc_top_10: ", acc_top_10 / len(eval_paths))
+    # print("acc_top_20: ", acc_top_20 / len(eval_paths))
+    # print("---------------------------------------------")
+    # print("predictions generated...")
+    # writer.add_scalar(f'accuracy_top_1',
+    #                   acc_top_1,
+    #                   epoch
+    #                   )
+    #
+    # writer.add_scalar(f'accuracy_top_5',
+    #                   acc_top_5,
+    #                   epoch
+    #                   )
+    #
+    # writer.add_scalar(f'accuracy_top_10',
+    #                   acc_top_10,
+    #                   epoch
+    #                   )
+    #
+    # writer.add_scalar(f'accuracy_top_20',
+    #                   acc_top_20,
+    #                   epoch
+    #                   )
     # sorted array according
-    for i, same_cate_images in enumerate(n_same_cate_images_total[:100]):
+    for i, same_cate_images in enumerate(n_same_cate_images_total[:1]):
         fig = plt.figure(figsize=(14, 60))
         query_image = eval_paths[i]
         # image_result_index = sorted_index[i, :]
