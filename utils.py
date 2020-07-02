@@ -254,17 +254,15 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                                     num_workers=11,
                                     batch_size=args.batch_size)
 
-    embeddings = []
-    for batch in tqdm(scoring_dataloader, total=len(scoring_dataloader)):
-        with torch.no_grad():
-            embedding = model(batch['image'].cuda())
-            embedding = embedding.cpu().detach().numpy()
-            embeddings.append(embedding)
-    embeddings = np.concatenate(embeddings)
-
-    np.save(os.path.join(output_folder,
-                         f'embeddings_{date_id}.npy'),
-            embeddings)
+    # embeddings = []
+    # for batch in tqdm(scoring_dataloader, total=len(scoring_dataloader)):
+    #     with torch.no_grad():
+    #         embedding = model(batch['image'].cuda())
+    #         embedding = embedding.cpu().detach().numpy()
+    #         embeddings.append(embedding)
+    # embeddings = np.concatenate(embeddings)
+    embeddings = np.load('/content/clothes-retrieval/embedding/embeddings.npy')
+    print("Loading embedding dataset finished!")
 
     test_dataset = ClothesDataset(eval_paths,
                                   mapping_label_id,
@@ -277,6 +275,7 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
                                  batch_size=args.batch_size)
 
 
+
     test_embeddings = []
     for batch in tqdm(test_dataloader, total=len(test_dataloader)):
         with torch.no_grad():
@@ -285,9 +284,9 @@ def compute_predictions(args, model, paths: list, eval_paths: list, mapping_labe
             test_embeddings.append(test_embedding)
     test_embeddings = np.concatenate(test_embeddings)
 
-    np.save(os.path.join(output_folder,
-                         f'test_embeddings_{date_id}.npy'),
-            test_embeddings)
+    # np.save(os.path.join(output_folder,
+    #                      f'test_embeddings_{date_id}.npy'),
+    #         test_embeddings)
 
     # eval_labels = [eval_path.split('/')[-1].split('~')[-4] for eval_path in eval_paths]
     # eval_label_indexes = np.array([mapping_label_id[eval_label] for eval_label in eval_labels])
